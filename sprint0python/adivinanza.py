@@ -9,7 +9,7 @@ print("""Adivina adivinanza...
 
 opcion = input('Respuesta (a, b ó c): ')
 
-if(opcion == 'a' or opcion == 'A' or opcion.lower == 'un ladrillo'):
+if(opcion == 'a' or opcion == 'A' or opcion.lower() == 'un ladrillo'):
     print("Respuesta correcta")
     puntuacion += 10
 
@@ -26,7 +26,7 @@ print("""Adivina adivinanza...
     
 opcion = input('Respuesta (a, b ó c): ')
 
-if(opcion == 'c' or opcion == 'C' or opcion.lower == 'la luna'):
+if(opcion == 'c' or opcion == 'C' or opcion.lower() == 'la luna'):
     print("Respuesta correcta")
     puntuacion += 10
 else:
@@ -43,7 +43,7 @@ print("""Adivina adivinanza...
     
 opcion = input('Respuesta (a, b ó c): ')
 
-if(opcion == 'a' or opcion == 'A' or opcion.lower == 'biblioteca'):
+if(opcion == 'a' or opcion == 'A' or opcion.lower() == 'biblioteca'):
     print("Respuesta correcta")
     puntuacion += 10
 else:
