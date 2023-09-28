@@ -1,3 +1,4 @@
+#Variable numérica a que se lle sumará 10pts en caso de resposta correcta ou restaráselle 5pts en caso incorrecto
 puntuacion = 0
 
 print("""Adivina adivinanza...
@@ -6,7 +7,7 @@ print("""Adivina adivinanza...
       b) Pintura azul
       c) Un plátano
       """)
-
+#Pedimos que introduza a resposta que cree correcta o usuario e verificamos que sexa correcta
 opcion = input('Respuesta (a, b ó c): ')
 
 if(opcion == 'a' or opcion == 'A' or opcion.lower() == 'un ladrillo'):

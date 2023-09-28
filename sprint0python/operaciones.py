@@ -1,5 +1,7 @@
+#Importamos esta librería para poder facer o os.system('pause') e os.system('cls')
 import os
-
+       
+#Pedimos 2 números e verificamos que o que entra non é unha cadena de texto
 print("Dame 2 números para comenzar")
 try:
     num1 = float(input('X='))
@@ -16,9 +18,12 @@ print("""¿Qué operación desea hacer?
         6. Salir del programa
         """)
 
+#Mentres !salir faremos un bucle infinito
 salir = False
 while salir == False:
-
+    # Pedimos a opción que desexa facer con eses 2 números, tendo as posibilidades sempre arriba e
+    # coas operacións amosadas xusto debaixo. Se se desexan cambiar os números borraranse os cálculos feitos
+    # ata ese momento e introducirá outros valores.
     opcion = input('Opción: ')
     
     if(opcion == "6" or opcion.lower() == "salir"):
