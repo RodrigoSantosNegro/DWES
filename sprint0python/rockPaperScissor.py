@@ -21,10 +21,10 @@ def play(machineChoice, playerChoice):
         return 'Tie'
 #contador de xogadas totales
 plays = 0
-while(plays < 5):
-    #Facemos unha pequena lista coas posibles opcións
-    machine = ['Rock', 'Paper', 'Scissor']
 
+#Facemos unha pequena lista coas posibles opcións
+machine = ['Rock', 'Paper', 'Scissor']
+while(plays < 5 or machineScore == 3 or playerScore == 3):
     print("""¿What are you going to play?
         1) Rock
         2) Paper
