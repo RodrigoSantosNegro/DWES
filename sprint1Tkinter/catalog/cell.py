@@ -7,4 +7,7 @@ class Cell:
         self.path = path
 
         image = Image.open(self.path)
+        #Redimensionamos la imagen NO editada
+        image = image.resize((100, 100), Image.Resampling.LANCZOS)
+        #La lanzamos
         self.image_tk = ImageTk.PhotoImage(image)
