@@ -1,5 +1,5 @@
 import tkinter as ttk
-from cell import CatalogCell
+from cell import Cell
 
 
 class MainWindow:
@@ -9,11 +9,11 @@ class MainWindow:
         self.root = root 
 
         self.cells = [
-            CatalogCell("catalog/data/unedited/cuchara.jpg"),
-            CatalogCell("catalog/data/unedited/mike.png"),
-            CatalogCell("catalog/data/unedited/op.jpg"),
-            CatalogCell("catalog/data/unedited/padreando.png"),
-            CatalogCell("catalog/data/unedited/women.jpg")
+            Cell("catalog/data/edited/cuchara.jpg"),
+            Cell("catalog/data/edited/mike.png"),
+            Cell("catalog/data/edited/op.jpg"),
+            Cell("catalog/data/edited/padreando.jpg"),
+            Cell("catalog/data/edited/women.jpg")
         ]
 
         for i, cell in enumerate(self.cells):
