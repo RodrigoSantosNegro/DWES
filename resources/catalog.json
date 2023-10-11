@@ -1,0 +1,27 @@
+[
+    {
+        "name": "Cuchara",
+        "description": "Una cuchara de metal :D",
+        "image_url": "https://github.com/RodrigoSantosNegro/DWES/blob/main/resources/cuchara.jpg"
+    },
+    {
+        "name": "Mike",
+        "description": "El increíble monstruo de Monstruos SA aparece en pantalla",
+        "image_url": "https://github.com/RodrigoSantosNegro/DWES/blob/main/resources/mike.png"
+    },
+    {
+        "name": "One piece",
+        "description": "Símbolo pirata mu guapo de uno de los mejores animes de todos los tiempos",
+        "image_url": "https://github.com/RodrigoSantosNegro/DWES/blob/main/resources/op.jpg"
+    },
+    {
+        "name": "Nano",
+        "description": "Qué decir, es el Nano, mi padre, tu padre, nuestro padre",
+        "image_url": "https://github.com/RodrigoSantosNegro/DWES/blob/main/resources/padreando.jpg"
+    },
+    {
+        "name": "Women Cafe",
+        "description": "jaja, women. *Sorbito al cafe* jajaja",
+        "image_url": "https://github.com/RodrigoSantosNegro/DWES/blob/main/resources/women.jpg"
+    }
+]
