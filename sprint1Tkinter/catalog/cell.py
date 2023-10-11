@@ -3,8 +3,10 @@ import tkinter as tk
 from PIL import Image, ImageTk
 
 class Cell:
-    def __init__(self, path):
+    def __init__(self, path, title, description):
         self.path = path
+        self.title = title
+        self.description = description
 
         image = Image.open(self.path)
         #Redimensionamos la imagen NO editada
