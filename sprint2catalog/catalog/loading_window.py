@@ -7,6 +7,8 @@ import requests
 # Definimos una clase para la ventana de carga
 class LoadingWindow:
     def __init__(self, root):
+        self.finished = False
+        self.json_data = []
         # Configuramos la ventana de carga
         self.root = root
         self.root.title("Cargando...")  # Título de la ventana
@@ -36,6 +38,7 @@ class LoadingWindow:
         # Creamos un hilo para ejecutar la tarea ficticia en segundo plano
         self.thread = threading.Thread(target=self.fetch_json_data)
         self.thread.start()
+        self.check_thread()
 
 
 
@@ -63,8 +66,15 @@ class LoadingWindow:
     def fetch_json_data(self):
         response = requests.get("https://raw.githubusercontent.com/RodrigoSantosNegro/DWES/main/resources/catalog.json")
         if response.status_code == 200:
-            json_data = response.json()
-            launch_main_window(json_data)
+            self.json_data = response.json()
+            self.finished = True
+
+    def check_thread(self):
+        if(self.finished):
+            self.root.destroy()
+            launch_main_window(self.json_data)
+        else:
+            self.root.after(100, self.check_thread)
 
 def launch_main_window(json_data):
     root = tk.Tk()
