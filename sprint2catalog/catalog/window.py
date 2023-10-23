@@ -19,6 +19,7 @@ class MainWindow:
         response = requests.get(url)
         image_data = Image.open(BytesIO(response.content))
         image = ImageTk.PhotoImage(image_data)
+        return image
 
     def __init__(self,root, json_data):
         root.title("MainWindow")
