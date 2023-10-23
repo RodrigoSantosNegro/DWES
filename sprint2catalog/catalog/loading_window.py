@@ -11,8 +11,12 @@ class LoadingWindow:
         self.json_data = []
         # Configuramos la ventana de carga
         self.root = root
+
+        x = (self.root.winfo_screenwidth() - self.root.winfo_reqwidth()) / 2 
+        y = (self.root.winfo_screenheight() - self.root.winfo_reqheight()) / 2 
+        self.root.geometry (f"+{int (x)}+{int(y)}")
+
         self.root.title("Cargando...")  # Título de la ventana
-        self.root.geometry("170x120")  # Tamaño de la ventana
         self.root.resizable(False, False)  # No se puede redimensionar
 
         # Creamos una etiqueta que muestra "Cargando datos..."
@@ -80,6 +84,8 @@ def launch_main_window(json_data):
     root = tk.Tk()
     app = MainWindow(root, json_data)
     root.mainloop()
+
+    
 
             
 

@@ -24,6 +24,9 @@ class MainWindow:
     def __init__(self,root, json_data):
         root.title("MainWindow")
         self.root = root 
+        x = (self.root.winfo_screenwidth() - self.root.winfo_reqwidth()) / 2 
+        y = (self.root.winfo_screenheight() - self.root.winfo_reqheight()) / 2 
+        self.root.geometry (f"+{int (x)}+{int(y)}")
         #guardamos en cells todas las imágenes que queremos mostrar
         self.cells = []
         data = json_data
