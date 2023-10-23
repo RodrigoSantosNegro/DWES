@@ -1,7 +1,8 @@
 # Importamos las bibliotecas necesarias
 import threading  # Para ejecutar tareas en segundo plano
-import time  # Para simular una carga ficticia
+from window import MainWindow
 import tkinter as tk  # Para crear la interfaz gráfica
+import requests
 
 # Definimos una clase para la ventana de carga
 class LoadingWindow:
@@ -36,6 +37,8 @@ class LoadingWindow:
         self.thread = threading.Thread(target=self.fetch_json_data)
         self.thread.start()
 
+
+
     # Método para dibujar el círculo de progreso
     def draw_progress_circle(self, progress):
         self.canvas.delete("progress")  # Borramos el círculo existente
@@ -56,11 +59,20 @@ class LoadingWindow:
         # Programamos una llamada futura para continuar la animación
         self.root.after(5, self.update_progress_circle)
 
-    # Método para simular una carga de datos
+    # Método para cargar datos de un JSON ubicado en GitHub
     def fetch_json_data(self):
-        time.sleep(5)  # Simulamos una carga de 5 segundos
-        # Luego de cargar los datos (o completar la tarea), cerramos la ventana de carga
-        self.root.destroy()
+        response = requests.get("https://raw.githubusercontent.com/RodrigoSantosNegro/DWES/main/resources/catalog.json")
+        if response.status_code == 200:
+            json_data = response.json()
+            launch_main_window(json_data)
+
+def launch_main_window(json_data):
+    root = tk.Tk()
+    app = MainWindow(root, json_data)
+    root.mainloop()
+
+            
+
 
 # Creamos una instancia de la ventana de carga
 root = tk.Tk()
