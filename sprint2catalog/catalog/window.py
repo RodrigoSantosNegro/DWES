@@ -39,9 +39,27 @@ class MainWindow:
     def __init__(self,root, json_data):
         root.title("MainWindow")
         self.root = root 
+        root.columnconfigure(0, weight=1)
+        root.rowconfigure(0, weight=1)
         x = (self.root.winfo_screenwidth() - self.root.winfo_reqwidth()) / 2 
         y = (self.root.winfo_screenheight() - self.root.winfo_reqheight()) / 2 
         self.root.geometry (f"+{int (x)}+{int(y)}")
+        
+        # Crear un Canvas con una barra de desplazamiento vertical
+        canvas = ttk.Canvas(root)
+        canvas.grid(row=0, column=0, sticky="nsew")
+
+        scrollbar = ttk.Scrollbar(root, orient="vertical", command=canvas.yview)
+        scrollbar.grid(row=0, column=1, sticky="ns")
+        canvas.config(yscrollcommand=scrollbar.set)
+
+        # Crear un marco para contener las celdas
+        frame = ttk.Frame(canvas)
+        canvas.create_window((0, 0), window=frame, anchor="nw")
+        
+        canvas.grid_rowconfigure(0, weight=1)
+        canvas.grid_columnconfigure(0, weight=1)
+        
         #guardamos en cells todas las imágenes que queremos mostrar
         self.cells = []
         data = json_data
@@ -55,9 +73,15 @@ class MainWindow:
 
         #Asignamos a cada imagen una fila distinta (i)
         for i, cell in enumerate(self.cells):
-            label = ttk.Label(root, image= cell.image_tk, text=cell.title, compound= ttk.BOTTOM)
-            label.grid(row=i,column=0)
-            label.bind("<Button-1>", lambda event, cell = cell: self.on_button_click(cell))
+            label = ttk.Label(frame, image=cell.image_tk, text=cell.title, compound=ttk.BOTTOM)
+            label.grid(row=i, column=0, sticky="w")
+            label.bind("<Button-1>", lambda event, cell=cell: self.on_button_click(cell))
 
+        # Configurar el enlace de desplazamiento del Canvas para todo el contenido
+        def on_configure(event):
+            canvas.configure(scrollregion=canvas.bbox("all"))
+
+        frame.bind("<Configure>", on_configure)
+        
         #Creamos el menú superior
         self.create_menu()
