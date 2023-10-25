@@ -84,13 +84,3 @@ def launch_main_window(json_data):
     root = tk.Tk()
     app = MainWindow(root, json_data)
     root.mainloop()
-
-    
-
-            
-
-
-# Creamos una instancia de la ventana de carga
-root = tk.Tk()
-loading_window = LoadingWindow(root)
-root.mainloop()  # Ejecutamos la aplicación
