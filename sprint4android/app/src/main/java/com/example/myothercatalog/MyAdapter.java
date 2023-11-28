@@ -2,6 +2,7 @@ package com.example.myothercatalog;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,8 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.myothercatalog.Item;
-import com.example.myothercatalog.R;
+
 
 import java.util.List;
 
@@ -45,7 +45,9 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent intent = new Intent(context, DetailActivity.class);
+                intent.putExtra("itemName", item.getItemName());
+                context.startActivity(intent);
             }
         });
     }
