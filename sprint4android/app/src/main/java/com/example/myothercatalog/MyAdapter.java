@@ -39,14 +39,16 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         Item item = itemList.get(position);
 
         holder.itemTitle.setText(item.getItemName());
-        holder.itemDescription.setText(item.getItemDescription());
         Glide.with(context).load(item.getItemUrl()).into(holder.itemImage);
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Al hacer clic en la celda, abrir la DetailActivity y pasar los datos
                 Intent intent = new Intent(context, DetailActivity.class);
                 intent.putExtra("itemName", item.getItemName());
+                intent.putExtra("itemImageUrl", item.getItemUrl());
+                intent.putExtra("itemDescription", item.getItemDescription());
                 context.startActivity(intent);
             }
         });
@@ -66,7 +68,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             super(itemView);
             itemImage = itemView.findViewById(R.id.itemImageView);
             itemTitle = itemView.findViewById(R.id.itemNameTextView);
-            itemDescription = itemView.findViewById(R.id.itemDescriptionTextView);
         }
     }
 }
