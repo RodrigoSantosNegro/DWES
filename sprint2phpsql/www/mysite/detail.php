@@ -34,7 +34,8 @@ $result2 = mysqli_query($db, $query2) or die('Error en la consulta de comentario
 
 
 while ($comentario = mysqli_fetch_array($result2)) {
-    echo '<li>'.$comentario['comentario'].'</li>';
+    echo '<li><strong>Fecha: '.$comentario['fecha'].'</strong><br>';
+    echo $comentario['comentario'].'</li>';
 }
 ?>
 </ul>
