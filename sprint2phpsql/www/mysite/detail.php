@@ -39,6 +39,14 @@ while ($comentario = mysqli_fetch_array($result2)) {
 ?>
 </ul>
 
+<h3>Deja un nuevo comentario:</h3>
+<form action="comment.php" method="post">
+    <textarea rows="4" cols="50" name="new_comment" placeholder="Escribe tu comentario aquí..."></textarea><br>
+    <input type="hidden" name="libro_id" value="<?php echo $libro_id; ?>">
+    <input type="submit" value="Comentar">
+</form>
+
+
 <?php
 mysqli_close($db);
 ?>
