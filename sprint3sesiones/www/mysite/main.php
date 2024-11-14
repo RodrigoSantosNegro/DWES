@@ -74,6 +74,7 @@ $result = mysqli_query($db, $query) or die('Error en la consulta');
     ?>
 
 </div>
+<a href="/logout.php">Logout</a>
 </body>
 </html>
 <?php
