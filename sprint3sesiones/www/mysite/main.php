@@ -51,6 +51,15 @@ $result = mysqli_query($db, $query) or die('Error en la consulta');
             text-decoration: none;
             color: #007bff;
         }
+	.enlace{
+	    text-decoration: none;
+	}
+	.enlace:hover{
+	    color: white;
+	    background-color: grey;
+	    padding: 5px;
+	    border-radius: 5rem;
+	}
     </style>
 </head>
 <body>
@@ -74,7 +83,7 @@ $result = mysqli_query($db, $query) or die('Error en la consulta');
     ?>
 
 </div>
-<a href="/logout.php">Logout</a>
+<a class="enlace"  href="/logout.php">Logout</a>
 </body>
 </html>
 <?php
