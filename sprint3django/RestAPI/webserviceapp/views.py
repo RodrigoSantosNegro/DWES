@@ -1,6 +1,16 @@
-from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import JsonResponse
+from .models import Tlibros
 
-# Create your views here.
-def pagina_de_prueba(request):
-	return HttpResponse("<h1>Hola caracola</h1>");
+
+def obtener_libros(request):
+    libros = Tlibros.objects.all()
+    respuesta = []
+    for libro in libros:
+        respuesta.append({
+            'id': libro.id,
+            'nombre': libro.nombre,
+            'autor': libro.autor,
+            'año_publicacion': libro.año_publicacion,
+            'url_imagen': libro.url_imagen,
+        })
+    return JsonResponse(respuesta, safe=False)
