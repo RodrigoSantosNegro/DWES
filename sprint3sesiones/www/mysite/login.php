@@ -1,6 +1,6 @@
 <?php
 // Conexión a la base de datos
-$db = mysqli_connect('localhost', 'root', '1234', 'mysitedb') or die('Error de conexión');
+$db = mysqli_connect('172.16.0.2', 'root', '1234', 'mysitedb') or die('Error de conexión');
 
 // Obtener datos del formulario
 $email_posted = $_POST['f_email'];
