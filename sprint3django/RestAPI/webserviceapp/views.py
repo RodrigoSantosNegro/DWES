@@ -35,7 +35,7 @@ def obtener_libro_por_id(request, id):
     except Tlibros.DoesNotExist:
         return JsonResponse({'error': 'Libro no encontrado'}, status=404)
 
-
+@csrf_excempt
 def crear_comentario(request, id):
     if request.method == 'POST':
         try:
