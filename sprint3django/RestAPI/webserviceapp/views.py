@@ -1,6 +1,8 @@
 from django.http import JsonResponse
 from .models import Tlibros
 from .models import Tcomentarios
+import json
+
 
 def obtener_libros(request):
     libros = Tlibros.objects.all()
@@ -32,3 +34,18 @@ def obtener_libro_por_id(request, id):
         return JsonResponse(respuesta, safe=False)
     except Tlibros.DoesNotExist:
         return JsonResponse({'error': 'Libro no encontrado'}, status=404)
+
+
+def crear_comentario(request, id):
+    if request.method == 'POST':
+        try:
+            libro = Tlibros.objects.get(id=id)
+            data = json.loads(request.body)
+            nuevo_comentario = Tcomentarios(libro=libro, comentario=data.get('nuevo_comentario'))
+            nuevo_comentario.save()
+            return JsonResponse({}, status=200)
+        except Tlibros.DoesNotExist:
+            return JsonResponse({'error': 'Libro no encontrado'}, status=404)
+        except KeyError:
+            return JsonResponse({'error': 'Falta el campo "nuevo_comentario"'}, status=400)
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
