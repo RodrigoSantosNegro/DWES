@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-# Create your models here.
+
 class CustomUser(AbstractUser):
     ROLE_CHOICES = [
         ('organizador', 'Organizador'),
@@ -14,6 +14,7 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return self.username
 
+
 class Evento(models.Model):
     titulo = models.CharField(max_length=200)
     descripcion = models.TextField()
@@ -24,6 +25,7 @@ class Evento(models.Model):
 
     def __str__(self):
         return self.titulo
+
 
 class Reserva(models.Model):
     ESTADO_CHOICES = [
@@ -38,4 +40,14 @@ class Reserva(models.Model):
     estado = models.CharField(max_length=10, choices=ESTADO_CHOICES, default='pendiente')
 
     def __str__(self):
-        return f"Reserva de {self.usuario.username} para {self.evento.titulo}"
+        return f"Reserva de {self.usuario.username} para evento {self.evento.titulo}"
+
+
+class Comentario(models.Model):
+    texto = models.TextField()
+    evento = models.ForeignKey(Evento, on_delete=models.CASCADE, related_name="comentarios")
+    usuario = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="comentarios")
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Comentario de {self.usuario.username} en evento {self.evento.titulo}"
