@@ -47,6 +47,13 @@ def listar_eventos(request):
 
 
 #Gestión de reservas:
+def listar_reservas(request, id):
+    if(request.method == 'GET'):
 
+        reservas = Reserva.objects.all()
+
+        
+        data = 0
+        return JsonResponse(data, safe=False)
 
 #Comentarios:
