@@ -7,34 +7,32 @@ from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
 
-#CRUD de eventos:
+# CRUD de eventos:
 def listar_eventos(request):
     if request.method == 'GET':
         titulo = request.GET.get('titulo', None)
         fecha = request.GET.get('fecha', None)
         pagina = request.GET.get('pagina', 1)
 
-        #Ahora obtenemos todos los eventos y luego filtramos según tenga o no los parámetros de título o fecha
-        eventos = Evento.objects.all().order_by('-fecha_hora') #Ordenados por fecha descendente
+        # Ahora obtenemos todos los eventos y luego filtramos según tenga o no los parámetros de título o fecha
+        eventos = Evento.objects.all().order_by('-fecha_hora')  #Ordenados por fecha descendente
         if titulo:
             eventos = eventos.filter(titulo__icontains=titulo)
         if fecha:
             eventos = eventos.filter(fecha_hora__date=fecha)
 
-
-        #Paginamos máximo 5 elementos por página
+        # Paginamos máximo 5 elementos por página
         paginator = Paginator(eventos, 5)
         try:
             eventos_paginados = paginator.page(pagina)
         except Exception:
             return JsonResponse({"error": "Página no válida"}, status=400)
 
-
-        #Ahora que hemos filtrado (o no) construimos el JSON y lo devolvemos
+        # Ahora que hemos filtrado (o no) construimos el JSON y lo devolvemos
         data = {
             "total_paginas": paginator.num_pages,
             "pagina_actual": eventos_paginados.number,
-            "eventos":[
+            "eventos": [
                 {
                     "id": e.id,
                     "titulo": e.titulo,
@@ -43,15 +41,25 @@ def listar_eventos(request):
                     "capacidad": e.capacidad_maxima,
                     "imagen_url": e.imagen_url,
                     "organizador": e.organizador
-                 } for e in eventos],
+                } for e in eventos],
         }
         return JsonResponse(data, safe=False)
+
 
 @csrf_exempt
 def actualizar_evento(request, id):
     if request.method in ["PUT", "PATCH"]:
+
         data = json.loads(request.body)
         evento = Evento.objects.get(id=id)
+
+        # Si no es un organizador lo echamos pa fuera
+        if request.user != evento.organizador:
+            return JsonResponse(
+                {"error": "¡Sólo los organizadores pueden actualizar un evento pillo!"},
+                status=403
+            )
+
         evento.titulo = data.get("titulo", evento.titulo)
         evento.descripcion = data.get("descripcion", evento.descripcion)
         evento.capacidad_maxima = data.get("capacidad_maxima", evento.capacidad_maxima)
@@ -65,10 +73,21 @@ def actualizar_evento(request, id):
 def eliminar_evento(request, id):
     if request.method == "DELETE":
         evento = Evento.objects.get(id=id)
+
+        # Si no es un organizador lo echamos pa fuera
+        if request.user != evento.organizador:
+            return JsonResponse(
+                {"error": "¡Sólo los organizadores pueden actualizar un evento pillo!"},
+                status=403
+            )
+
         evento.delete()
         return JsonResponse({"mensaje": "Evento eliminado"})
 
-#Gestión de reservas:
 
 
-#Comentarios:
+
+# Gestión de reservas:
+
+
+# Comentarios:
