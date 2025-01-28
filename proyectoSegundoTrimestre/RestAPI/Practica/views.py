@@ -1,50 +1,72 @@
-from django.shortcuts import render
+import json
 from django.http import JsonResponse
 from models import CustomUser, Evento, Comentario, Reserva
 from django.core.paginator import Paginator
+from django.views.decorators.csrf import csrf_exempt
 
 
 # Create your views here.
 
 #CRUD de eventos:
 def listar_eventos(request):
-    titulo = request.GET.get('titulo', None)
-    fecha = request.GET.get('fecha', None)
-    pagina = request.GET.get('pagina', 1)
+    if request.method == 'GET':
+        titulo = request.GET.get('titulo', None)
+        fecha = request.GET.get('fecha', None)
+        pagina = request.GET.get('pagina', 1)
 
-    #Ahora obtenemos todos los eventos y luego filtramos según tenga o no los parámetros de título o fecha
-    eventos = Evento.objects.all().order_by('-fecha_hora') #Ordenados por fecha descendente
-    if titulo:
-        eventos = eventos.filter(titulo__icontains=titulo)
-    if fecha:
-        eventos = eventos.filter(fecha_hora__date=fecha)
-
-
-    #Paginamos máximo 5 elementos por página
-    paginator = Paginator(eventos, 5)
-    try:
-        eventos_paginados = paginator.page(pagina)
-    except Exception:
-        return JsonResponse({"error": "Página no válida"}, status=400)
+        #Ahora obtenemos todos los eventos y luego filtramos según tenga o no los parámetros de título o fecha
+        eventos = Evento.objects.all().order_by('-fecha_hora') #Ordenados por fecha descendente
+        if titulo:
+            eventos = eventos.filter(titulo__icontains=titulo)
+        if fecha:
+            eventos = eventos.filter(fecha_hora__date=fecha)
 
 
-    #Ahora que hemos filtrado (o no) construimos el JSON y lo devolvemos
-    data = {
-        "total_paginas": paginator.num_pages,
-        "pagina_actual": eventos_paginados.number,
-        "eventos":[
-            {
-                "id": e.id,
-                "titulo": e.titulo,
-                "descripcion": e.descripcion,
-                "fecha": e.fecha_hora,
-                "capacidad": e.capacidad_maxima,
-                "imagen_url": e.imagen_url,
-                "organizador":e.organizador
-             } for e in eventos],
-    }
-    return JsonResponse(data, safe=False)
+        #Paginamos máximo 5 elementos por página
+        paginator = Paginator(eventos, 5)
+        try:
+            eventos_paginados = paginator.page(pagina)
+        except Exception:
+            return JsonResponse({"error": "Página no válida"}, status=400)
 
+
+        #Ahora que hemos filtrado (o no) construimos el JSON y lo devolvemos
+        data = {
+            "total_paginas": paginator.num_pages,
+            "pagina_actual": eventos_paginados.number,
+            "eventos":[
+                {
+                    "id": e.id,
+                    "titulo": e.titulo,
+                    "descripcion": e.descripcion,
+                    "fecha": e.fecha_hora,
+                    "capacidad": e.capacidad_maxima,
+                    "imagen_url": e.imagen_url,
+                    "organizador": e.organizador
+                 } for e in eventos],
+        }
+        return JsonResponse(data, safe=False)
+
+@csrf_exempt
+def actualizar_evento(request, id):
+    if request.method in ["PUT", "PATCH"]:
+        data = json.loads(request.body)
+        evento = Evento.objects.get(id=id)
+        evento.titulo = data.get("titulo", evento.titulo)
+        evento.descripcion = data.get("descripcion", evento.descripcion)
+        evento.capacidad_maxima = data.get("capacidad_maxima", evento.capacidad_maxima)
+        evento.imagen_url = data.get("imagen_url", evento.imagen_url)
+        evento.organizador = data.get("organizador", evento.organizador)
+        evento.save()
+        return JsonResponse({"mensaje": "Evento actualizado"})
+
+
+@csrf_exempt
+def eliminar_evento(request, id):
+    if request.method == "DELETE":
+        evento = Evento.objects.get(id=id)
+        evento.delete()
+        return JsonResponse({"mensaje": "Evento eliminado"})
 
 #Gestión de reservas:
 
