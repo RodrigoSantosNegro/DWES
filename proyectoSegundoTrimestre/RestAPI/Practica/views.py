@@ -47,13 +47,57 @@ def listar_eventos(request):
 
 
 #Gestión de reservas:
-def listar_reservas(request, id):
+def listar_reservas(request):
     if(request.method == 'GET'):
 
         reservas = Reserva.objects.all()
 
-        
-        data = 0
+        data = [
+            {
+                "id": r.id,
+                "usuario": r.usuario,
+                "evento": r.evento,
+                "entradas reservadas": r.entradas_reservadas,
+                "estado": r.estado,
+            } for r in reservas
+        ]
         return JsonResponse(data, safe=False)
+
+
+@crsf_excempt
+def crear_reserva(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+
+        reserva = Reserva.objects.create(
+            usuario = data["usuario"],
+            evento = data["evento"],
+            entradas_reservadas = data["entradas_reservadas"],
+            estado = data["estado"]
+        )
+        return JsonResponse({"id": reserva.id, "mensaje":"Reserva creada correctamente"})
+
+@csrf_exempt
+def actualizar_estado_reserva(request, id):
+    if request.method == 'PATCH':
+        data = json.loads(request.body)
+        reserva = Reserva.objects.get(id=id)
+
+        if reserva.organizador != request.user:
+            return JsonResponse({"error":"Pillueeelo que sólo los organizadores pueden cambiar el estado de la reserva"}, status=403)
+
+        reserva.estado = data.get("estado", reserva.estado)
+        reserva.save()
+
+        return JsonResponse({"mensaje": "Estado de la reserva actualizado"})
+
+
+def cancelar_reserva(request, id):
+    if(request.method == 'DELETE'):
+        reserva = Reserva.objects.get(id=id)
+
+        if():
+            return JsonResponse({"error":"No hay ninguna reserva que cancelar para este usaurio"})
+
 
 #Comentarios:
