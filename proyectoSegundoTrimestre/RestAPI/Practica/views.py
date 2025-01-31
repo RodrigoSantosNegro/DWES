@@ -45,7 +45,7 @@ def listar_eventos(request):
         }
         return JsonResponse(data, safe=False)
 
-
+#PUT/PATCH actualizar un evento (sólo organizadores)
 @csrf_exempt
 def actualizar_evento(request, id):
     if request.method in ["PUT", "PATCH"]:
@@ -69,6 +69,7 @@ def actualizar_evento(request, id):
         return JsonResponse({"mensaje": "Evento actualizado"})
 
 
+#DELETE eliminar un evento (sólo organizadores)
 @csrf_exempt
 def eliminar_evento(request, id):
     if request.method == "DELETE":
@@ -103,11 +104,6 @@ def crearEvento(request):
             organizador= data["organizador"]
         )
         return JsonResponse({"id": evento.id, "mensaje": "Evento creado correctamente"})
-
-#PUT/PATCH actualizar un evento (sólo organizadores)
-
-
-#DELETE eliminar un evento (sólo organizadores)
 
 
 #----------------------------------------------------------------
