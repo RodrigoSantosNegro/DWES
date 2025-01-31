@@ -108,13 +108,63 @@ def crearEvento(request):
 
 #----------------------------------------------------------------
 # GESTIÓN DE RESERVAS -------------------------------------------
-#GET Listar reservas de un usuario autenticado
+# GET Listar reservas de un usuario autenticado
+def listar_reservas(request, id):
+    if (request.method == 'GET'):
+        reservas = Reserva.objects.all()
+
+        data = [
+            {
+                "id": r.id,
+                "usuario": r.usuario,
+                "evento": r.evento,
+                "entradas reservadas": r.entradas_reservadas,
+                "estado": r.estado,
+            } for r in reservas
+        ]
+        return JsonResponse(data, safe=False)
+
 
 #POST crear nueva reserva
+@crsf_excempt
+def crear_reserva(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+
+        reserva = Reserva.objects.create(
+            usuario = data["usuario"],
+            evento = data["evento"],
+            entradas_reservadas = data["entradas_reservadas"],
+            estado = data["estado"]
+        )
+        return JsonResponse({"id": reserva.id, "mensaje":"Reserva creada correctamente"})
+
 
 #PUT/PATCH Actualizar el estado de una reserva (solo organizadores).
+@csrf_exempt
+def actualizar_estado_reserva(request, id):
+    if request.method == 'PATCH':
+        data = json.loads(request.body)
+        reserva = Reserva.objects.get(id=id)
+
+        if reserva.organizador != request.user:
+            return JsonResponse({"error":"Pillueeelo que sólo los organizadores pueden cambiar el estado de la reserva"}, status=403)
+
+        reserva.estado = data.get("estado", reserva.estado)
+        reserva.save()
+
+        return JsonResponse({"mensaje": "Estado de la reserva actualizado"})
+
 
 #DELETE Cancelar una reserva (solo participantes para sus reservas).
+def cancelar_reserva(request, id):
+    if(request.method == 'DELETE'):
+        reserva = Reserva.objects.get(id=id)
+
+        if():
+            return JsonResponse({"error":"No hay ninguna reserva que cancelar para este usaurio"})
+
+
 
 #----------------------------------------------------------------
 # COMENTARIOS ---------------------------------------------------
@@ -125,3 +175,5 @@ def crearEvento(request):
 # USUARIO -------------------------------------------------------
 
 #----------------------------------------------------------------
+
+
