@@ -1,9 +1,9 @@
 import json
+from django.shortcuts import render
 from django.http import JsonResponse
 from models import CustomUser, Evento, Comentario, Reserva
 from django.core.paginator import Paginator
 from django.views.decorators.csrf import csrf_exempt
-
 
 # Create your views here.
 
@@ -85,9 +85,47 @@ def eliminar_evento(request, id):
         return JsonResponse({"mensaje": "Evento eliminado"})
 
 
+#POST crear un evento
+def crearEvento(request):
+
+    #ME FALTA PONER QUE SÓLO LOS ORGANIZADORES PUEDAN HACER ESTO
+    #AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 
 
-# Gestión de reservas:
+    if request.method == "POST":
+        data = json.loads(request.body)
+        evento = Evento.objects.create(
+            titulo = data["titulo"],
+            descripcion = data["descripcion"],
+            fecha_hora = data["fecha_hora"],
+            capacidad_maxima = data["capacidad_maxima"],
+            imagen_url = data["imagen_url"],
+            organizador= data["organizador"]
+        )
+        return JsonResponse({"id": evento.id, "mensaje": "Evento creado correctamente"})
+
+#PUT/PATCH actualizar un evento (sólo organizadores)
 
 
-# Comentarios:
+#DELETE eliminar un evento (sólo organizadores)
+
+
+#----------------------------------------------------------------
+# GESTIÓN DE RESERVAS -------------------------------------------
+#GET Listar reservas de un usuario autenticado
+
+#POST crear nueva reserva
+
+#PUT/PATCH Actualizar el estado de una reserva (solo organizadores).
+
+#DELETE Cancelar una reserva (solo participantes para sus reservas).
+
+#----------------------------------------------------------------
+# COMENTARIOS ---------------------------------------------------
+#GET Listar comentarios de un evento.
+#POST Crear un comentario asociado a un evento (solo usuarios autenticados).
+
+#----------------------------------------------------------------
+# USUARIO -------------------------------------------------------
+
+#----------------------------------------------------------------
