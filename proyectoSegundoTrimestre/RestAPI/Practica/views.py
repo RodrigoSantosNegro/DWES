@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 from django.shortcuts import render
 from django.http import JsonResponse
-from models import CustomUser, Evento, Comentario, Reserva
+from RestAPI.Practica.models import CustomUser, Evento, Comentario, Reserva
 from django.core.paginator import Paginator
 from django.views.decorators.csrf import csrf_exempt
 
@@ -106,7 +106,7 @@ def eliminar_evento(request, id):
 
 #POST crear un evento
 @csrf_exempt
-def crearEvento(request):
+def crear_evento(request):
     if request.method == "POST":
         try:
             # Verificar que el usuario autenticado sea organizador
