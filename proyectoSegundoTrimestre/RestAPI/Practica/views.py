@@ -105,31 +105,36 @@ def eliminar_evento(request, id):
 
 
 #POST crear un evento
+@csrf_exempt
 def crearEvento(request):
-
-    #ME FALTA PONER QUE SÓLO LOS ORGANIZADORES PUEDAN HACER ESTO
-    #AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-
-
     if request.method == "POST":
-        data = json.loads(request.body)
-        evento = Evento.objects.create(
-            titulo = data["titulo"],
-            descripcion = data["descripcion"],
-            fecha_hora = data["fecha_hora"],
-            capacidad_maxima = data["capacidad_maxima"],
-            imagen_url = data["imagen_url"],
-            organizador= data["organizador"]
-        )
-        return JsonResponse({"id": evento.id, "mensaje": "Evento creado correctamente"})
+        try:
+            # Verificar que el usuario autenticado sea organizador
+            if request.user.role != "organizador":
+                return JsonResponse({"error": "Solo los organizadores pueden crear eventos."}, status=403)
 
+            data = json.loads(request.body)
+            evento = Evento.objects.create(
+                titulo = data["titulo"],
+                descripcion = data["descripcion"],
+                fecha_hora = data["fecha_hora"],
+                capacidad_maxima = data["capacidad_maxima"],
+                imagen_url = data["imagen_url"],
+                organizador= data["organizador"]
+            )
+            return JsonResponse({"id": evento.id, "mensaje": "Evento creado correctamente"})
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "El cuerpo de la solicitud no es un JSON válido."}, status=400)
+
+    return JsonResponse({"error": "Método no permitido. Usa POST."}, status=405)
 
 #----------------------------------------------------------------
 # GESTIÓN DE RESERVAS -------------------------------------------
 # GET Listar reservas de un usuario autenticado
 def listar_reservas(request, id):
     if (request.method == 'GET'):
-        reservas = Reserva.objects.all()
+        reservas = Reserva.objects.filter(usuario=request.user)
 
         data = [
             {
@@ -142,54 +147,88 @@ def listar_reservas(request, id):
         ]
         return JsonResponse(data, safe=False)
 
+    return JsonResponse({"error": "Método no permitido. Usa GET."}, status=405)
+
 
 #POST crear nueva reserva
 @csrf_exempt
 def crear_reserva(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
+        try:
+            data = json.loads(request.body)
+            evento_id = data.get("evento")
+            entradas_reservadas = data.get("entradas_reservadas")
 
-        reserva = Reserva.objects.create(
-            usuario = data["usuario"],
-            evento = data["evento"],
-            entradas_reservadas = data["entradas_reservadas"],
-            estado = data["estado"]
-        )
-        return JsonResponse({"id": reserva.id, "mensaje":"Reserva creada correctamente"})
+            # Verificamos que el evento existe
+            try:
+                evento = Evento.objects.get(id=evento_id)
+            except Evento.DoesNotExist:
+                return JsonResponse({"error": "El evento no existe."}, status=404)
+
+            reserva = Reserva.objects.create(
+                usuario=request.user,
+                evento=evento,
+                entradas_reservadas=entradas_reservadas,
+                estado="pendiente"
+            )
+            return JsonResponse({"id": reserva.id, "mensaje":"Reserva creada correctamente"})
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "El cuerpo de la solicitud no es un JSON válido."}, status=400)
+
+    return JsonResponse({"error": "Método no permitido. Usa POST."}, status=405)
+
 
 
 #PUT/PATCH Actualizar el estado de una reserva (solo organizadores).
 @csrf_exempt
 def actualizar_estado_reserva(request, id):
     if request.method == 'PATCH':
-        data = json.loads(request.body)
-        reserva = Reserva.objects.get(id=id)
+        try:
+            data = json.loads(request.body)
 
-        if reserva.organizador != request.user:
-            return JsonResponse({"error":"Pillueeelo que sólo los organizadores pueden cambiar el estado de la reserva"}, status=403)
+            #Comprobamos que la reserva exista
+            try:
+                reserva = Reserva.objects.get(id=id)
+            except Reserva.DoesNotExist:
+                return JsonResponse({"error": "La reserva no existe."}, status=404)
 
-        reserva.estado = data.get("estado", reserva.estado)
-        reserva.save()
+            if reserva.evento.organizador != request.user:
+                return JsonResponse({"error":"Pillueeelo que sólo los organizadores pueden cambiar el estado de la reserva"}, status=403)
 
-        return JsonResponse({"mensaje": "Estado de la reserva actualizado"}, safe=False)
+            reserva.estado = data.get("estado")
+            reserva.save()
+
+            return JsonResponse({"mensaje": "Estado de la reserva actualizado"}, safe=False)
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "El cuerpo de la solicitud no es un JSON válido."}, status=400)
+
+    return JsonResponse({"error": "Método no permitido. Usa PATCH."}, status=405)
+
 
 
 #DELETE Cancelar una reserva (solo participantes para sus reservas).
 def cancelar_reserva(request, id):
     if(request.method == 'DELETE'):
-        reserva = Reserva.objects.get(id=id)
+        try:
+            reserva = Reserva.objects.get(id=id)
 
-        if(request.user != reserva.usuario):
-            return JsonResponse({"error":"No hay ninguna reserva que cancelar para este usaurio"}, status=403)
+            if(request.user != reserva.usuario):
+                return JsonResponse({"error":"No hay ninguna reserva que cancelar para este usaurio"}, status=403)
 
-        reserva.delete()
-        return JsonResponse({"mensaje":"Reserva borrada correctamente"}, safe=False)
+            reserva.delete()
+            return JsonResponse({"mensaje":"Reserva borrada correctamente"}, safe=False)
+
+        except Reserva.DoesNotExist:
+            return JsonResponse({"error": "No existe una reserva con ese ID."}, status=404)
+
+    return JsonResponse({"error": "Método no permitido. Usa DELETE."}, status=405)
 
 
 #----------------------------------------------------------------
 # COMENTARIOS ---------------------------------------------------
 #GET Listar comentarios de un evento.
-@csrf_exempt
 def listar_comentarios(request, id_evento):
     if request.method == 'GET':
         try:
