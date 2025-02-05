@@ -16,8 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-
-from RestAPI.Practica import views
+from Practica import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),

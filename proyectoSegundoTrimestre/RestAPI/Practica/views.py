@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 from django.shortcuts import render
 from django.http import JsonResponse
-from RestAPI.Practica.models import CustomUser, Evento, Comentario, Reserva
+from .models import CustomUser, Evento, Comentario, Reserva
 from django.core.paginator import Paginator
 from django.views.decorators.csrf import csrf_exempt
 
@@ -52,7 +52,7 @@ def listar_eventos(request):
 
 #PUT/PATCH actualizar un evento (sólo organizadores)
 @csrf_exempt
-@login_required
+
 def actualizar_evento(request, id):
     if request.method in ["PUT", "PATCH"]:
         try:
@@ -106,6 +106,7 @@ def eliminar_evento(request, id):
 
 #POST crear un evento
 @csrf_exempt
+@login_required
 def crear_evento(request):
     if request.method == "POST":
         try:
