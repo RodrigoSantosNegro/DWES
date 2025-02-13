@@ -52,7 +52,6 @@ def listar_eventos(request):
 
 #PUT/PATCH actualizar un evento (sólo organizadores)
 @csrf_exempt
-
 def actualizar_evento(request, id):
     if request.method in ["PUT", "PATCH"]:
         try:
