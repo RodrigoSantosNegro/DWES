@@ -58,16 +58,15 @@ def listar_eventos(request):
 
 # POST crear un evento
 @csrf_exempt
-@login_required
 def crear_evento(request):
     if request.method == "POST":
-        try:
-            # Verificar que el usuario autenticado sea organizador
-            if not request.user.is_authenticated:
-                return JsonResponse({"error": "Usuario no autenticado."}, status=401)
-            if request.user.role != "organizador":
-                return JsonResponse({"error": "Solo los organizadores pueden crear eventos."}, status=403)
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Debes iniciar sesión para crear un evento."}, status=403)
 
+        if request.user.role != "organizador":
+            return JsonResponse({"error": "Solo los organizadores pueden crear eventos."}, status=403)
+
+        try:
             data = json.loads(request.body)
             evento = Evento.objects.create(
                 titulo=data["titulo"],
@@ -94,19 +93,21 @@ def actualizar_evento(request, id):
             data = json.loads(request.body)
             evento = Evento.objects.get(id=id)
 
-            # Si no es un organizador lo echamos pa fuera
-            if request.user != evento.organizador:
+            # Verificar si el usuario tiene el rol de organizador
+            if request.user.role != "organizador":
                 return JsonResponse(
-                    {"error": "¡Sólo los organizadores pueden actualizar un evento pillo!"},
+                    {"error": "¡Sólo los organizadores pueden actualizar un evento!"},
                     status=403
                 )
 
+            # Actualizar los campos del evento
             evento.titulo = data.get("titulo", evento.titulo)
             evento.descripcion = data.get("descripcion", evento.descripcion)
+            evento.fecha_hora = data.get("fecha_hora", evento.fecha_hora)
             evento.capacidad_maxima = data.get("capacidad_maxima", evento.capacidad_maxima)
             evento.imagen_url = data.get("imagen_url", evento.imagen_url)
             evento.save()
-            return JsonResponse({"mensaje": "Evento actualizado"})
+            return JsonResponse({"mensaje": "Evento actualizado correctamente"})
 
         except Evento.DoesNotExist:
             return JsonResponse({"error": "El evento no existe"}, status=404)
@@ -116,7 +117,7 @@ def actualizar_evento(request, id):
     return JsonResponse({"error": "Método no permitido. Usa PUT o PATCH."}, status=405)
 
 
-#DELETE eliminar un evento (sólo organizadores)
+# DELETE eliminar un evento (sólo organizadores)
 @csrf_exempt
 @login_required
 def eliminar_evento(request, id):
@@ -125,9 +126,9 @@ def eliminar_evento(request, id):
             evento = Evento.objects.get(id=id)
 
             # Si no es un organizador lo echamos pa fuera
-            if request.user != evento.organizador:
+            if request.user.role != "organizador":
                 return JsonResponse(
-                    {"error": "¡Sólo los organizadores pueden eliminar un evento pillo!"},
+                    {"error": "¡Sólo los organizadores pueden actualizar un evento!"},
                     status=403
                 )
 
@@ -140,8 +141,153 @@ def eliminar_evento(request, id):
     return JsonResponse({"error": "Método no permitido. Usa DELETE."}, status=405)
 
 
+# CRUD de reservas:
+@login_required
+def listar_reservas(request):
+    if request.method == "GET":
+        reservas = Reserva.objects.filter(usuario=request.user)
+        data = [
+            {
+                "id": reserva.id,
+                "evento": {
+                    "id": reserva.evento.id,
+                    "titulo": reserva.evento.titulo,
+                },
+                "entradas_reservadas": reserva.entradas_reservadas,
+                "estado": reserva.estado,
+            } for reserva in reservas
+        ]
+        return JsonResponse(data, safe=False)
 
-#----------------------------------------------------------------
+    return JsonResponse({"error": "Método no permitido. Usa GET."}, status=405)
+
+
+@csrf_exempt
+@login_required
+def crear_reserva(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            evento = Evento.objects.get(id=data["evento_id"])
+            entradas_reservadas = data["entradas_reservadas"]
+
+            reserva = Reserva.objects.create(
+                usuario=request.user,
+                evento=evento,
+                entradas_reservadas=entradas_reservadas,
+                estado="pendiente"
+            )
+            return JsonResponse({"id": reserva.id, "mensaje": "Reserva creada correctamente"})
+
+        except Evento.DoesNotExist:
+            return JsonResponse({"error": "El evento no existe"}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "El cuerpo de la solicitud no es un JSON válido"}, status=400)
+
+    return JsonResponse({"error": "Método no permitido. Usa POST."}, status=405)
+
+
+@csrf_exempt
+@login_required
+def actualizar_reserva(request, id):
+    if request.method in ["PUT", "PATCH"]:
+        try:
+            data = json.loads(request.body)
+            reserva = Reserva.objects.get(id=id)
+
+            # Verificar si el usuario tiene el rol de organizador
+            if request.user.role != "organizador":
+                return JsonResponse(
+                    {"error": "¡Sólo los organizadores pueden actualizar el estado de una reserva!"},
+                    status=403
+                )
+
+            reserva.estado = data.get("estado", reserva.estado)
+            reserva.save()
+            return JsonResponse({"mensaje": "Estado de la reserva actualizado correctamente"})
+
+        except Reserva.DoesNotExist:
+            return JsonResponse({"error": "La reserva no existe"}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "El cuerpo de la solicitud no es un JSON válido"}, status=400)
+
+    return JsonResponse({"error": "Método no permitido. Usa PUT o PATCH."}, status=405)
+
+
+@csrf_exempt
+@login_required
+def cancelar_reserva(request, id):
+    if request.method == "DELETE":
+        try:
+            reserva = Reserva.objects.get(id=id)
+
+            # Verificar si el usuario es el propietario de la reserva y tiene el rol de participante
+            if request.user != reserva.usuario or request.user.role != "participante":
+                return JsonResponse(
+                    {"error": "¡Sólo los participantes pueden cancelar sus propias reservas!"},
+                    status=403
+                )
+
+            reserva.delete()
+            return JsonResponse({"mensaje": "Reserva cancelada"})
+
+        except Reserva.DoesNotExist:
+            return JsonResponse({"error": "La reserva no existe"}, status=404)
+
+    return JsonResponse({"error": "Método no permitido. Usa DELETE."}, status=405)
+
+
+# CRUD de comentarios:
+def listar_comentarios(request, evento_id):
+    if request.method == "GET":
+        try:
+            evento = Evento.objects.get(id=evento_id)
+            comentarios = Comentario.objects.filter(evento=evento)
+            data = [
+                {
+                    "id": comentario.id,
+                    "texto": comentario.texto,
+                    "usuario": {
+                        "id": comentario.usuario.id,
+                        "username": comentario.usuario.username,
+                    },
+                    "fecha_creacion": comentario.fecha_creacion,
+                } for comentario in comentarios
+            ]
+            return JsonResponse(data, safe=False)
+        except Evento.DoesNotExist:
+            return JsonResponse({"error": "El evento no existe"}, status=404)
+
+    return JsonResponse({"error": "Método no permitido. Usa GET."}, status=405)
+
+
+@csrf_exempt
+@login_required
+def crear_comentario(request, evento_id):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            texto = data.get("texto")
+            if not texto:
+                return JsonResponse({"error": "El campo 'texto' es obligatorio."}, status=400)
+
+            evento = Evento.objects.get(id=evento_id)
+            comentario = Comentario.objects.create(
+                texto=texto,
+                evento=evento,
+                usuario=request.user
+            )
+            return JsonResponse({"id": comentario.id, "mensaje": "Comentario creado correctamente"})
+
+        except Evento.DoesNotExist:
+            return JsonResponse({"error": "El evento no existe"}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "El cuerpo de la solicitud no es un JSON válido"}, status=400)
+
+    return JsonResponse({"error": "Método no permitido. Usa POST."}, status=405)
+
+
+# ----------------------------------------------------------------
 # USUARIO -------------------------------------------------------
 @csrf_exempt
 def iniciar_sesion(request):
@@ -160,10 +306,6 @@ def iniciar_sesion(request):
             user = authenticate(username=username, password=password)
 
             if user is not None:
-                random_token = secrets.token_hex(10)
-                session = Session(user=user_object, token=random_token)
-                session.save()
-                return JsonResponse({"token": random_token}, status=201)
                 login(request, user)
                 return JsonResponse({
                     "mensaje": "Inicio de sesión exitoso",
@@ -223,4 +365,4 @@ def register(request):
             return JsonResponse({"error": "JSON inválido"}, status=400)
 
     return JsonResponse({"error": "Método no permitido"}, status=405)
-#----------------------------------------------------------------
+# ----------------------------------------------------------------
