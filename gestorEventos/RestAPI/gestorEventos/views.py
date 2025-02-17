@@ -10,6 +10,35 @@ from django.core.paginator import Paginator
 from django.views.decorators.csrf import csrf_exempt
 
 
+def sesion(request):
+    contexto = {
+        'nombre': 'Django',
+        'version': 4.0,
+    }
+    return render(request, 'inicio.html', contexto)
+
+def inicio(request):
+    contexto = {
+        'nombre': 'Django',
+        'version': 4.0,
+    }
+    return render(request, 'inicio.html', contexto)
+
+def detalle_evento(request):
+    contexto = {
+        'nombre': 'Django',
+        'version': 4.0,
+    }
+    return render(request, 'inicio.html', contexto)
+
+def reservas_usuario(request):
+    contexto = {
+        'nombre': 'Django',
+        'version': 4.0,
+    }
+    return render(request, 'inicio.html', contexto)
+
+
 # Create your views here.
 
 # CRUD de eventos:

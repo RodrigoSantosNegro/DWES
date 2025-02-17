@@ -19,6 +19,11 @@ from django.urls import path
 from gestorEventos import views
 
 urlpatterns = [
+    path('sesion/', views.sesion, name='sesion'),
+    path('inicio/', views.inicio, name='inicio'),
+    path('detalle_evento', views.detalle_evento, name='detalle_evento'),
+    path('reservas_usuario', views.reservas_usuario, name='reservas_usuario'),
+
     path('admin/', admin.site.urls),
     path('listar_eventos/', views.listar_eventos, name='listar_eventos'),
     path('crear_evento/', views.crear_evento, name='crear_evento'),
