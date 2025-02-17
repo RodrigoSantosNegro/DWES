@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle del Evento{% endblock %}
+
+{% block content %}
+<h2>{{ evento.titulo }}</h2>
+<p>{{ evento.descripcion }}</p>
+<p>Fecha y Hora: {{ evento.fecha_hora }}</p>
+<p>Capacidad Máxima: {{ evento.capacidad_maxima }}</p>
+<img src="{{ evento.imagen_url }}" alt="Imagen del evento">
+
+<h3>Reservar</h3>
+<form method="post" action="{% url 'crear_reserva' evento.id %}">
+    {% csrf_token %}
+    <label for="entradas_reservadas">Entradas:</label>
+    <input type="number" id="entradas_reservadas" name="entradas_reservadas" min="1" max="{{ evento.capacidad_maxima }}">
+    <button type="submit">Reservar</button>
+</form>
+
+<h3>Comentarios</h3>
+<ul>
+    {% for comentario in comentarios %}
+    <li>
+        <p>{{ comentario.texto }}</p>
+        <p>Por: {{ comentario.usuario.username }} el {{ comentario.fecha_creacion }}</p>
+    </li>
+    {% endfor %}
+</ul>
+
+<h3>Agregar Comentario</h3>
+<form method="post" action="{% url 'crear_comentario' evento.id %}">
+    {% csrf_token %}
+    <textarea name="texto" rows="4" cols="50"></textarea>
+    <button type="submit">Comentar</button>
+</form>
+{% endblock %}

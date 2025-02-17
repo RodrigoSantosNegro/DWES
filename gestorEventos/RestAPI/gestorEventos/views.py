@@ -3,11 +3,12 @@ import json
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from .models import CustomUser, Evento, Comentario, Reserva
 from django.core.paginator import Paginator
 from django.views.decorators.csrf import csrf_exempt
+from .forms import ReservaForm, ComentarioForm
 
 
 def sesion(request):
@@ -18,25 +19,28 @@ def sesion(request):
     return render(request, 'inicio.html', contexto)
 
 def inicio(request):
-    contexto = {
-        'nombre': 'Django',
-        'version': 4.0,
-    }
-    return render(request, 'inicio.html', contexto)
+    eventos = Evento.objects.all().order_by('-fecha_hora')
+    return render(request, 'inicio.html', {'eventos': eventos})
 
-def detalle_evento(request):
-    contexto = {
-        'nombre': 'Django',
-        'version': 4.0,
-    }
-    return render(request, 'inicio.html', contexto)
+def detalle_evento(request, id):
+    evento = Evento.objects.get(id=id)
+    comentarios = Comentario.objects.filter(evento=evento)
+    if request.method == 'POST':
+        form = ReservaForm(request.POST)
+        if form.is_valid():
+            reserva = form.save(commit=False)
+            reserva.usuario = request.user
+            reserva.evento = evento
+            reserva.save()
+            return redirect('detalle_evento', id=evento.id)
+    else:
+        form = ReservaForm()
+    return render(request, 'detalle_evento.html', {'evento': evento, 'comentarios': comentarios, 'form': form})
 
-def reservas_usuario(request):
-    contexto = {
-        'nombre': 'Django',
-        'version': 4.0,
-    }
-    return render(request, 'inicio.html', contexto)
+@login_required
+def panel_usuario(request):
+    reservas = Reserva.objects.filter(usuario=request.user)
+    return render(request, 'panel_usuario.html', {'reservas': reservas})
 
 
 # Create your views here.
@@ -193,12 +197,13 @@ def listar_reservas(request):
 
 @csrf_exempt
 @login_required
-def crear_reserva(request):
+def crear_reserva(request, evento_id):
     if request.method == "POST":
         try:
-            data = json.loads(request.body)
-            evento = Evento.objects.get(id=data["evento_id"])
-            entradas_reservadas = data["entradas_reservadas"]
+            evento = Evento.objects.get(id=evento_id)
+            entradas_reservadas = request.POST.get("entradas_reservadas")
+            if not entradas_reservadas:
+                return JsonResponse({"error": "El campo 'entradas_reservadas' es obligatorio."}, status=400)
 
             reserva = Reserva.objects.create(
                 usuario=request.user,
@@ -246,7 +251,7 @@ def actualizar_reserva(request, id):
 @csrf_exempt
 @login_required
 def cancelar_reserva(request, id):
-    if request.method == "DELETE":
+    if request.method == "POST":
         try:
             reserva = Reserva.objects.get(id=id)
 

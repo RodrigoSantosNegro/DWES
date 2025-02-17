@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Mi Panel{% endblock %}
+
+{% block content %}
+<h2>Mis Reservas</h2>
+<ul>
+    {% for reserva in reservas %}
+    <li>
+        <p>Evento: {{ reserva.evento.titulo }}</p>
+        <p>Entradas Reservadas: {{ reserva.entradas_reservadas }}</p>
+        <p>Estado: {{ reserva.estado }}</p>
+        <form method="post" action="{% url 'cancelar_reserva' reserva.id %}">
+            {% csrf_token %}
+            <button type="submit">Cancelar Reserva</button>
+        </form>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}
